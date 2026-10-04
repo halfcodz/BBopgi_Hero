@@ -278,6 +278,23 @@
 | ~3시간 | 7-1 | 전설 드래곤 2~3마리, 별 3~4 |
 | 1일차 끝 | 10~13챕터 | 기계 Lv5 근처, 신화 1마리 가능성 |
 
+**엔진 자동 플레이 검증** (`tests/test_play.tscn`, 실제 전투 코드를 10배속으로 돌린 봇, 150분)
+
+| 게임 시간 | 결과 |
+|---|---|
+| 6분 | 2-1 도달, 드래곤 15종, 뽑기 62회 |
+| 11분 | 3-1 도달 |
+| 20분 | 4-1 도달 |
+| 40분 | 5-1 도달 |
+| 63분 | 첫 둥지 이사 (최고 5-10, 비늘 +9) |
+| 89분 | 6-1 도달 |
+| 112분 | 두 번째 이사 (비늘 누적 24) |
+| 137분 | 7-1 도달, 20종 수집 완료 |
+
+**튜닝 메모**
+- 시뮬레이터보다 첫 환생이 약 15분 늦다(스킬·속성 상성 덕분에 4챕터를 그냥 뚫는다). 첫 세션 1시간 안 환생 목표는 지켜진다.
+- 2시간 안에 20종을 다 모은다. 초반 도파민엔 좋지만 수집 목표가 일찍 끝나므로 M2에서 드래곤 수를 늘리거나, 첫 클리어 코인을 2→1로 줄이는 안을 검토한다.
+
 ### 8.2 페이싱 원칙
 
 1. **첫 5분은 무조건 빠르게**: 스테이지당 20~40초, 막힘이 없다.
@@ -381,24 +398,31 @@
 
 ```
 뽑기키우기/
-├─ project.godot
+├─ project.godot               # 720×1280 세로, 오토로드 Game
 ├─ scenes/main.tscn            # 루트 씬 (UI는 코드로 구성)
 ├─ scripts/
-│  ├─ autoload/
+│  ├─ autoload/game_state.gd   # Game: 저장 데이터, 재화, 시그널, 세이브/로드, 오프라인, 일일 미션
+│  ├─ core/
 │  │  ├─ balance.gd            # Balance: 모든 수치 공식·상수
 │  │  ├─ dragon_db.gd          # DragonDB: 드래곤·적·챕터 데이터
-│  │  ├─ game_state.gd         # Game: 저장 데이터, 재화, 시그널, 세이브/로드, 오프라인
-│  │  └─ gacha.gd              # Gacha: 확률 추첨, 천장, 기계 레벨
-│  ├─ util/num.gd              # Num: 큰 수 표기 (K, M, B, T, aa…)
-│  ├─ main.gd                  # 레이아웃, 탭 전환, 팝업
+│  │  ├─ gacha.gd              # Gacha: 확률 추첨, 천장, 기계 레벨, 확률 공시 문구
+│  │  └─ num.gd                # Num: 큰 수 표기 (K, M, B, T, aa…)
+│  ├─ main.gd                  # 레이아웃, 탭 전환, 토스트, 모달, 오프라인 팝업
 │  ├─ battle/battle_view.gd    # 전투 시뮬레이션 + 그리기
-│  ├─ gacha/claw_machine.gd    # 인형뽑기 기계
+│  ├─ gacha/
+│  │  ├─ claw_machine.gd       # 인형뽑기 기계
+│  │  └─ reveal_overlay.gd     # 등급 승급 리빌 연출 (1회/10회)
 │  └─ ui/
-│     ├─ dragon_art.gd         # 절차적 드래곤 그리기 (속성·등급·별 반영)
-│     ├─ dragon_panel.gd
-│     ├─ growth_panel.gd
-│     └─ mission_panel.gd
-└─ (art/, audio/ 는 M1에서 추가)
+│     ├─ dragon_art.gd         # 절차적 드래곤·몬스터·재화 아이콘 그리기
+│     ├─ dragon_view.gd, widgets.gd, ui_kit.gd
+│     ├─ dragon_panel.gd       # 드래곤 탭
+│     ├─ growth_panel.gd       # 성장 탭
+│     └─ mission_panel.gd      # 미션 탭
+└─ tests/
+   ├─ test_core.tscn           # 코어 로직 테스트 (천장·세이브·환생 등)
+   ├─ test_play.tscn           # 가속 자동 플레이
+   ├─ screenshot.tscn          # 개발용 스크린샷
+   └─ gallery.tscn             # 드래곤 20종 외형 확인
 ```
 
 ### 12.2 원칙
