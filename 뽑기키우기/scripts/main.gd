@@ -37,11 +37,11 @@ func _ready() -> void:
 func _build() -> void:
 	var bg := ColorRect.new()
 	bg.color = UIKit.BG
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 
 	var root := UIKit.vbox(0)
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
 	# 상단 재화바
@@ -138,7 +138,7 @@ func switch_tab(key: String) -> void:
 		panels[k].visible = k == key
 	if not panels.has(key):
 		var p := _make_panel(key)
-		p.set_anchors_preset(Control.PRESET_FULL_RECT)
+		p.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		panel_host.add_child(p)
 		panels[key] = p
 	if panels[key].has_method("on_shown"):
@@ -210,11 +210,11 @@ func show_modal(title: String, body: Control, buttons: Array = []) -> Control:
 		buttons = [["확인", Callable()]]
 	var shade := ColorRect.new()
 	shade.color = Color(0.08, 0.05, 0.12, 0.7)
-	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(shade)
 	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	shade.add_child(center)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(minf(size.x - 60, 620), 0)

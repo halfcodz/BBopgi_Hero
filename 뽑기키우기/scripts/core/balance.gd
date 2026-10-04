@@ -79,7 +79,7 @@ const SOFT_PITY_SSR := 60      # 60회째부터 SSR 확률 증가
 const SOFT_PITY_STEP := 2.5    # 회당 +2.5%p
 const HARD_PITY_SSR := 90      # 90회째 SSR 이상 확정
 const MILEAGE_UR := 300
-const PERFECT_RANGE := 8.0
+const PERFECT_RANGE := 5.0
 
 
 # ── 공식 ────────────────────────────────────────────

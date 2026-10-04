@@ -34,6 +34,9 @@ static func draw_dragon(ci: CanvasItem, c: Vector2, r: float, element: int, rari
 	var dark := body.darkened(0.3)
 	var belly := body.lightened(0.55)
 	var rare: Color = Balance.RARITY_COLORS[rarity]
+	if rarity >= Balance.RARITY_SR:
+		body = body.lerp(rare, 0.12 + 0.04 * (rarity - 2))
+		dark = body.darkened(0.3)
 	if silhouette:
 		body = Color(0.25, 0.22, 0.3, 0.55)
 		dark = body
@@ -56,21 +59,16 @@ static func draw_dragon(ci: CanvasItem, c: Vector2, r: float, element: int, rari
 	ci.draw_colored_polygon(tail, dark)
 	draw_star_shape(ci, tip, r * 0.22, dark, 3, 0.5, PI if f > 0 else 0.0)
 
-	# 날개 (★3부터 커짐)
-	var wing_scale := 0.8 if star < 3 else 1.15
-	var flap := sin(t * 7.0) * 0.25
+	# 날개 (★3부터 커짐) — 둥근 박쥐날개
+	var wing_scale := 0.85 if star < 3 else 1.2
+	var flap := sin(t * 7.0) * 0.18
 	for side in [-1.0, 1.0]:
-		var base := p + Vector2(-f * r * 0.25, -r * 0.45)
-		var wing := PackedVector2Array([
-			base,
-			base + (Vector2(-f * r * 1.25, -r * 1.05 - side * r * 0.1) * wing_scale).rotated(flap * side * f),
-			base + (Vector2(-f * r * 0.8, -r * 0.45) * wing_scale).rotated(flap * side * f),
-			base + (Vector2(-f * r * 1.2, -r * 0.3) * wing_scale).rotated(flap * side * f),
-			base + Vector2(-f * r * 0.1, r * 0.3),
-		])
-		if f < 0:
-			wing.reverse()
-		ci.draw_colored_polygon(wing, dark if side < 0 else dark.lightened(0.15))
+		var base := p + Vector2(-f * r * 0.45, -r * 0.55 + side * r * 0.12)
+		var ang: float = (-0.75 + flap * side) * f + (PI if f < 0 else 0.0) + PI
+		var wc := base + Vector2(cos(ang), sin(ang)) * r * 0.45 * wing_scale
+		var wcol := dark if side < 0 else dark.lightened(0.18)
+		draw_ellipse(ci, wc, r * 0.6 * wing_scale, r * 0.34 * wing_scale, wcol, ang)
+		draw_ellipse(ci, wc + Vector2(cos(ang), sin(ang)) * r * 0.08, r * 0.38 * wing_scale, r * 0.18 * wing_scale, belly.lerp(wcol, 0.5), ang)
 
 	# 발
 	ci.draw_circle(p + Vector2(-r * 0.4, r * 0.85), r * 0.24, dark)
@@ -80,6 +78,8 @@ static func draw_dragon(ci: CanvasItem, c: Vector2, r: float, element: int, rari
 	ci.draw_circle(p, r * 1.02, OUTLINE if not silhouette else body)
 	ci.draw_circle(p, r, body)
 	draw_ellipse(ci, p + Vector2(f * r * 0.18, r * 0.32), r * 0.55, r * 0.5, belly)
+	if not silhouette:
+		_rarity_features(ci, p, r, f, rarity, body, dark, belly, rare, t)
 
 	# 등 가시
 	if not silhouette:
@@ -136,6 +136,31 @@ static func draw_dragon(ci: CanvasItem, c: Vector2, r: float, element: int, rari
 
 	if flash > 0.0:
 		ci.draw_circle(p, r * 1.05, Color(1, 1, 1, flash * 0.7))
+
+
+## 등급별 외형 특징: 같은 속성이라도 등급마다 생김새가 다르다.
+static func _rarity_features(ci: CanvasItem, p: Vector2, r: float, f: float, rarity: int,
+		body: Color, dark: Color, belly: Color, rare: Color, t: float) -> void:
+	match rarity:
+		1:  # 희귀: 둥근 귀 + 이마 점
+			for ex in [-0.35, 0.75]:
+				ci.draw_circle(p + Vector2(f * r * ex, -r * 0.82), r * 0.2, dark)
+				ci.draw_circle(p + Vector2(f * r * ex, -r * 0.82), r * 0.1, belly)
+			ci.draw_circle(p + Vector2(f * r * 0.33, -r * 0.55), r * 0.09, belly)
+		2:  # 영웅: 등 줄무늬
+			for i in 3:
+				var a := PI + (0.25 + i * 0.32) if f > 0 else -(0.25 + i * 0.32)
+				var c := p + Vector2(cos(a), sin(a)) * r * 0.62
+				ci.draw_arc(c, r * 0.22, a - 0.9, a + 0.9, 8, dark, maxf(2.0, r * 0.08))
+		3:  # 전설: 이마 보석 + 볼 문양
+			var g := p + Vector2(f * r * 0.33, -r * 0.6)
+			ci.draw_colored_polygon(PackedVector2Array([g + Vector2(0, -r * 0.16), g + Vector2(r * 0.11, 0),
+				g + Vector2(0, r * 0.16), g + Vector2(-r * 0.11, 0)]), rare)
+			ci.draw_circle(g + Vector2(-r * 0.03, -r * 0.05), r * 0.03, Color.WHITE)
+		4:  # 신화: 후광
+			var halo := Color.from_hsv(fmod(t * 0.3, 1.0), 0.45, 1.0, 0.9)
+			DragonArt.draw_ellipse(ci, p + Vector2(f * r * 0.1, -r * 1.35), r * 0.5, r * 0.14, halo)
+			ci.draw_arc(p, r * 1.08, 0, TAU, 32, Color(halo.r, halo.g, halo.b, 0.5), maxf(2.0, r * 0.05))
 
 
 ## 슬라임형 몬스터
