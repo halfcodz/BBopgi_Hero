@@ -10,6 +10,7 @@ func _ready() -> void:
 			args[kv[0]] = kv[1]
 	if args.has("fresh"):
 		Game.reset_save()
+		Game.offline_report = {}
 	if args.has("gold"):
 		Game.add_gold(float(args.gold), false)
 	if args.has("coins"):

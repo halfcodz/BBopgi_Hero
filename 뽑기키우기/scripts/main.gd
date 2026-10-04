@@ -245,7 +245,10 @@ func _show_offline_popup(report: Dictionary) -> void:
 	var v := UIKit.vbox(10)
 	v.add_child(UIKit.label("자는 동안 드래곤들이 모아 왔어요!", 24, UIKit.TEXT_SOFT, HORIZONTAL_ALIGNMENT_CENTER))
 	v.add_child(UIKit.label("방치 시간 " + Num.fmt_time(report.seconds), 22, UIKit.TEXT_SOFT, HORIZONTAL_ALIGNMENT_CENTER))
-	for pair in [["gold", Num.fmt(report.gold)], ["coin", str(report.coins)]]:
+	var pairs := [["gold", Num.fmt(report.gold)]]
+	if report.coins > 0:
+		pairs.append(["coin", str(report.coins)])
+	for pair in pairs:
 		var h := UIKit.hbox(10)
 		h.alignment = BoxContainer.ALIGNMENT_CENTER
 		h.add_child(Widgets.currency_icon(pair[0], 44))
